@@ -1,0 +1,13 @@
+{
+  "name": "style-kit-n",
+  "author": "Neal Williams",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": "true",
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}
