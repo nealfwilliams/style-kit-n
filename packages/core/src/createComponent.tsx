@@ -1,123 +1,269 @@
+import React, { useContext, useMemo, useState } from 'react';
+import { mergeStylesParams, useMemoizedObject } from './misc';
+import { useStyles } from './useStyles';
+import { StyleKitNContext } from './context';
+import {
+  ComputeStylesFn,
+  StyledComponent,
+  StyleEngine,
+  StylesParam,
+} from './types';
 
-import React, { CSSProperties } from "react";
-import { ComputeStyleFn, EventListeners, StyleEngine, StylesParam } from "./types";
-
-export function createComponent<BaseElement, Props, ParentProps, StyleProps>(params: {
-  root: BaseElement;
-  directStyles: CSSProperties;
-  directHoverStyles: CSSProperties;
-  directFocusStyles: CSSProperties;
-  styleProps: StyleProps;
-  hoverStyleProps: StyleProps;
-  focusStyleProps: StyleProps;
-  computeStyleFns: ComputeStyleFn<Props & ParentProps & StyleProps, StyleProps>[];
-  engine: StyleEngine<
+export function createComponent<
+  BaseElement extends string,
+  StyleProps extends Object = {},
+  Props extends Object = {},
+  ParentProps extends Object = {},
+  GeneratedStyles extends Object = {},
+  GeneratedClassNames extends string = string,
+  Engine extends StyleEngine<
     StyleProps,
-    any
-  >,
-  eventListeners: EventListeners 
-}){
-  const {
-    directStyles,
-    directHoverStyles,
-    directFocusStyles,
-    styleProps,
-    hoverStyleProps,
-    focusStyleProps,
-    engine,
-    computeStyleFns,
-    root,
-    eventListeners
-  } = params;
+    BaseElement,
+    any,
+    GeneratedClassNames,
+    GeneratedStyles
+  > = any
+>({
+  baseElement,
+  engine,
 
-  const [isHovered, setIsHovered] = React.useState(false);
-  const [isFocused, setIsFocused] = React.useState(false);
+  styles = {} as StylesParam<StyleProps, GeneratedStyles>,
+  inheritedStyles = {} as StylesParam<StyleProps, GeneratedStyles>,
 
-  const component: React.FC<Props & ParentProps & StyleProps> = (props) => {
+  computeStylesFn,
+  inheritedComputeStylesFns = [],
+}: {
+  baseElement: BaseElement;
+  engine: Engine;
+
+  styles?: StylesParam<StyleProps, GeneratedStyles>;
+  inheritedStyles?: StylesParam<StyleProps, GeneratedStyles>;
+
+  computeStylesFn?: ComputeStylesFn<
+    Props & ParentProps & StyleProps,
+    StyleProps,
+    GeneratedStyles
+  >;
+  inheritedComputeStylesFns?: ComputeStylesFn<
+    Props & ParentProps & StyleProps,
+    StyleProps,
+    GeneratedStyles
+  >[];
+}) {
+  const baseProps = engine.getBaseProps(baseElement);
+  const basePropNames = new Set(baseProps);
+
+  const Component: React.FC<Props &
+    ParentProps &
+    StyleProps> = _propsOnComponent => {
+    const [isHovered, setIsHovered] = useState(false);
+    const [isFocused, setIsFocused] = useState(false);
+    const { activeBreakpoints, theme } = useContext(StyleKitNContext);
+
+    const propsOnComponent = useMemoizedObject(_propsOnComponent);
+
     const {
-      computedStyles,
-      computedProps
-    } = React.useMemo(() => {
-      let computedStyles = {};
-      let computedProps = {};
+      styleProps,
+      directStyles,
+      isFocusSpecified,
+      isHoverSpecified,
+    } = useStyles({
+      stylesParam: styles,
+      isHovered,
+      isFocused,
+      activeBreakpoints,
+    });
 
-      for (const computeStyleFn of computeStyleFns) {
-        const computedStyleParam: StylesParam<StyleProps> = computeStyleFn(props);
-        const {
-          styles: _computedStyles,
-          hover: computedHoverParam={} as StylesParam<StyleProps>,
-          focus: computedFocusParam={} as StylesParam<StyleProps>,
-          ..._computedProps
-        } = computedStyleParam;
+    const {
+      styleProps: inheritedStyleProps,
+      directStyles: inheritedDirectStyles,
+      isFocusSpecified: isFocusSpecifiedOnParent,
+      isHoverSpecified: isHoverSpecifiedOnParent,
+    } = useStyles({
+      stylesParam: inheritedStyles,
+      isHovered,
+      isFocused,
+      activeBreakpoints,
+    });
 
-        const {styles: hoverStyles, ...hoverProps} = computedHoverParam;
-        const {styles: focusStyles, ...focusProps} = computedFocusParam;
+    // Compute styles if styles param passed as a function
+    const computedStylesParam: StylesParam = useMemo(() => {
+      return computeStylesFn ? computeStylesFn(propsOnComponent) : {};
+    }, [propsOnComponent]);
 
-        computedStyles = {
-          ...computedStyles,
-          ..._computedStyles,
-          ...(isHovered && hoverStyles),
-          ...(isFocused && focusStyles),
-        };
+    const {
+      styleProps: computedStyleProps,
+      directStyles: computedDirectStyles,
+      isFocusSpecified: hasComputedFocus,
+      isHoverSpecified: hasComputedHover,
+    } = useStyles({
+      stylesParam: computedStylesParam,
+      isHovered,
+      isFocused,
+      activeBreakpoints,
+    });
 
-        computedProps = {
-          ...computedProps,
-          ..._computedProps,
-          ...(isHovered && hoverProps),
-          ...(isFocused && focusProps),
-        };
+    // Compute styles from any inherited style functions
+    const inheritedComputedStylesParam = useMemo(() => {
+      const stylesParams: StylesParam[] = [];
+
+      for (const computeStylesFn of inheritedComputeStylesFns) {
+        stylesParams.push(computeStylesFn(propsOnComponent));
       }
-      return {
-        computedStyles,
-        computedProps
-      }
-    }, [isHovered, isFocused, ...Object.values(props)])
 
-    const allProps = {
-      ...styleProps,
-      ...computedProps,
-      ...(isHovered && hoverStyleProps),
-      ...(isFocused && focusStyleProps)
-    };
+      return mergeStylesParams(stylesParams);
+    }, [propsOnComponent]);
 
-    const generatedStyles: CSSProperties = React.useMemo(
-      () => engine.generateStyles(allProps),
-      [isHovered, isFocused, ...Object.values(props)]
+    const {
+      styleProps: inheritedComputedProps,
+      directStyles: inheritedComputedStyles,
+      isFocusSpecified: inheritedComputedFocus,
+      isHoverSpecified: inheritedComputedHover,
+    } = useStyles({
+      stylesParam: inheritedComputedStylesParam,
+      isHovered,
+      isFocused,
+      activeBreakpoints,
+    });
+
+    // Props coming from inheritance have lowest priority
+    const inheritedProps = useMemoizedObject({
+      ...inheritedStyleProps,
+      ...inheritedComputedProps,
+    } as StyleProps);
+
+    const propStylesFromInheritance: GeneratedStyles = useMemo(
+      () => engine.generateStyles(inheritedProps, theme),
+      [inheritedProps, theme]
     );
 
-    const generatedClassNames = React.useMemo(
-      () => engine.generateClasses(allProps),
-      [isHovered, isFocused, ...Object.values(props)]
+    // All props originating in component definition have higher priority
+    // than inherited props and lower priority than props passed directly
+    // to component
+    const propsFromDefinition = useMemoizedObject({
+      ...styleProps,
+      ...computedStyleProps,
+    } as StyleProps);
+
+    const propStylesFromDefinition: GeneratedStyles = useMemo(
+      () => engine.generateStyles(propsFromDefinition, theme),
+      [propsFromDefinition, theme]
+    );
+
+    const propStylesFromComponentProps: GeneratedStyles = React.useMemo(
+      () => engine.generateStyles(propsOnComponent, theme),
+      [propsOnComponent, theme]
     );
 
     const allStyles = {
-      ...generatedStyles,
-      ...directStyles,
-      ...computedStyles,
-      ...(isHovered && directHoverStyles),
-      ...(isFocused && directFocusStyles),
-    }
+      // Priority 3 - Styles from inheritance
+      ...propStylesFromInheritance,
+      ...inheritedDirectStyles,
+      ...inheritedComputedStyles,
 
-    const el = React.createElement(root as any, {
-      ...props,
+      // Priority 2 - Styles derived from component definition
+      ...propStylesFromDefinition,
+      ...directStyles,
+      ...computedDirectStyles,
+
+      // Priority 1 - Styles from directly passed props
+      ...propStylesFromComponentProps,
+    };
+
+    const shouldListenToFocus = React.useMemo(
+      () =>
+        isFocusSpecified ||
+        isFocusSpecifiedOnParent ||
+        hasComputedFocus ||
+        inheritedComputedFocus,
+      [
+        isFocusSpecified,
+        isFocusSpecifiedOnParent,
+        hasComputedFocus,
+        inheritedComputedFocus,
+      ]
+    );
+
+    const shouldListenToHover = React.useMemo(
+      () =>
+        isHoverSpecified ||
+        isHoverSpecifiedOnParent ||
+        hasComputedHover ||
+        inheritedComputedHover,
+      [
+        isHoverSpecified,
+        isHoverSpecifiedOnParent,
+        hasComputedHover,
+        inheritedComputedHover,
+      ]
+    );
+
+    const generatedClassNames = React.useMemo(() => {
+      const inheritedClassNames = engine.generateClasses(inheritedProps);
+      const classNamesFromDefinition = engine.generateClasses(
+        propsFromDefinition
+      );
+      const classNamesFromPassedProps = engine.generateClasses(
+        propsOnComponent
+      );
+
+      return engine
+        .resolveClassConflicts([
+          ...inheritedClassNames,
+          ...classNamesFromDefinition,
+          ...classNamesFromPassedProps,
+        ])
+        .join(' ');
+    }, [inheritedProps, propsFromDefinition, propsOnComponent]);
+
+    // Only keep component props that are valid on HTML, RN view, etc.
+    const baseElementProps = Object.keys(propsOnComponent).reduce(
+      (props, key) => {
+        if (basePropNames.has(key)) {
+          (props as any)[key] =
+            propsOnComponent[key as keyof typeof propsOnComponent];
+        }
+
+        return props;
+      },
+      {}
+    );
+
+    const el = React.createElement(baseElement as any, {
+      ...baseElementProps,
       style: allStyles,
-      className: generatedClassNames.join(' '),
+      className: generatedClassNames,
       onBlur: () => {
-        eventListeners.focus && setIsFocused(false);
+        shouldListenToFocus && setIsFocused(false);
       },
       onFocus: () => {
-        eventListeners.focus && setIsFocused(false);
+        shouldListenToFocus && setIsFocused(true);
       },
       onMouseOver: () => {
-        eventListeners.hover && setIsHovered(true);
+        shouldListenToHover && setIsHovered(true);
       },
       onMouseOut: () => {
-        eventListeners.hover && setIsHovered(false);
-      }
+        shouldListenToHover && setIsHovered(false);
+      },
     });
 
     return el;
-  }
+  };
 
-  return component;
+  const styledComponent = Component as StyledComponent<
+    Props & ParentProps & StyleProps,
+    BaseElement,
+    StyleProps,
+    GeneratedStyles
+  >;
+
+  styledComponent.baseElement = baseElement;
+
+  styledComponent.styles = mergeStylesParams([inheritedStyles, styles]);
+
+  styledComponent.computeStylesFns = computeStylesFn
+    ? [...inheritedComputeStylesFns, computeStylesFn]
+    : [...inheritedComputeStylesFns];
+
+  return styledComponent;
 }
