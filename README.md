@@ -2,78 +2,82 @@
 
 # Introduction
 
-`style-kit-n` is a library for managing styles in `React` and `React-Native` without writing CSS.
-
-`style-kit-n` was originally developed as a way to style React Native in lieu of CSS. After using
-the library, going back to CSS-centered approaches felt like a regression in developer experience,
-so the library was adapted for use on the web.
+`style-kit-n` is a library for managing styles in `React` and `React Native` without writing CSS.
 
 `style-kit-n` combines the benefits of two popular approaches to styling:
 - utility-first frameworks (eg. `tailwind`)
 - css-in-js (eg. `styled-components`)
 
-The guiding philosophy of `style-kit-n` is that writing CSS is never a good developer experience. 
-`style-kit-n` providing a React component architecture for managing styles that takes full advantage
-of developer experience (DX) benefits of Typescript and React.
+The guiding philosophy of `style-kit-n` is that writing CSS isn't a great developer experience. 
+`style-kit-n` provides a React component architecture for managing styles that takes full advantage
+of the developer experience (DX) benefits of Typescript and React.
 
-## Why so bad about CSS?
+## What's so bad about CSS?
 ### Maintainability
-Using CSS is prone to code rot, technical debt, and human error. Here are some reasons why CSS is hard to 
-maintain:
+Here are some reasons why CSS is hard to maintain. (Modular CSS avoids some, but not all,
+of these pitfalls.)
 
 #### Lack of tooling
-Typescript has some great tooling to help devs understand and modify codebases quickly without careless mistakes.
-The tooling for CSS pales in comparison.
+Typescript has great tooling to help devs understand and modify codebases quickly without 
+careless mistakes. CSS tooling pales in comparison.
 
-#### Scope management
-Because CSS classes use a global scope, managing CSS becomes painful as projects grow.
-CSS's specificity system provides a way to deal with this, but creates its own headaches.
-For example, if a shared component refactors its styling in a way that increased its specificity,
+#### Difficult refactoring/cleanup
+CSS classes populate one global scope. This impacts a developer's ability to confidently make changes
+without unintentionally changing other parts of an app. This in turn leads to regressions and code rot.
+
+#### Escalating specificity
+CSS's specificity system is intended to help manage the global scope but has its own headaches.
+For example, if a shared component refactors its styles such that their specificity increases,
 downstream usage of that component that overrides those styles can break.
 
-Lack of proper scoping also hurts a developer's ability to confidently make changes without unintentionally 
-changing other parts of an app. This leads to regressions and code rot (legacy code that engineers are
-too afraid to touch).
+#### Class naming
+Using CSS means linking styles to class names with strings. This is prone to careless spelling
+mistakes and accidental collisions. Furthermore, maintaining an ever-growing list of class names
+for every type of element that needs styling is a pain, especially because engineers are not
+always great at choosing apt names.
 
-Modularizing CSS can avoid some scope issues, but introduces new challenges to reusability. 
-
-#### Harmful indirection
+#### Indirection
 CSS is often touted as a way to isolate styling as an independent concern.
 
-However, the reality of most modern web applications is that styling is an essential part of an
-application's usability. If an application needs styling to be used successfully, then treating 
-styles as an independent silo of information is an invitation to break things.
+In practice, however, styling is an integral part of most web applications' usability.
+Treating styles as an independent silo of information can lead to
+regressions and technical debt, At the very least, coordinating code between two
+distinct programming languages is a bunch of extra work.
 
-The Tailwind creator authored a compelling article on 
+The creator of Tailwind wrote a more detailed 
+[article](https://adamwathan.me/css-utility-classes-and-separation-of-concerns/)
+on why "separation of concerns" is a false promise,
+and how many of the approaches for managing CSS classes can fail.
 
-### Explainability and Documentation
-There aren't universal existing standards for documenting CSS classes and their usage patterns, so engineers
-are often left guessing the correct context to use existing classes, creating redundant classes that violate DRY,
-or copy-pasting.
+#### Documentation
+There aren't existing standards for documenting reusable CSS classes and their usage patterns.
+Engineers are often left guessing the correct context to use existing classes, creating
+redundant classes that violate DRY, or copy-pasting.
 
 In comparison, React components present a clear model for explainabilitiy. Tools like 
 `storybook` and `styleguidist` provide as an easy way to document components
 and their usage patterns that can be shared across an organization.
 
-### Usability with React
-React's component-based architecture provides an intuitive and natural way to encapsulate the 
-behavior and structure of DOM elements.
+### Lack of synergy with React
+Use CSS classes directly within a dynamic React component is a clunky process that requires:
+1. creating different classes for each dynaming elements styles
+2. mapping that component's properties and state to those CSS class names.
 
-Use CSS classes directly within a dynamic React component requires mapping that component's
-properties and state to various CSS class names. This creates an additional layer of complexity that
-makes application harder to maintain and easier to break.
+This is an additional layer of complexity that makes application harder to maintain and easier to break.
 
-`style-kit-n` is built with React and Typescipt DX as its first priority. The intention of `style-kit-n` 
-is to build a framework that feels as natural and accessibility to developers as any other part of 
-the React ecosystem.
+`style-kit-n` is built with React and Typescipt synergy as its top priority. Component props can be
+directly tied to dynamic styles, and Typescript types just work. The intention is to feel as natural
+and accessibility to developers as any other part of the React ecosystem.
 
-
+### Incompatible with React Native
+CSS is not directly supported in React Native, which makes a maintainable solution for styling an even
+more acute need.
 
 ## How does it work?
 ### Creating components
-Components are declared in a way similar to `styled-component`, with a function that takes in a base element
-and the styles to apply to it. Styles can be either specified directly or using utility props to automatically
-pull values from your app's theme (recommended).
+Components are created with a function that takes in a base element and the styles to apply to it.
+Styles can be either specified directly or using utility props to automatically pull values
+from your app's theme (recommended).
 
 ```tsx
 import styled from '@style-kit-n/web';
@@ -120,15 +124,13 @@ const MyComponent = () => (
 ```
 
 ### Theming
-`style-kit-n` style props works by in pulling values from your design system or "theme."
+`style-kit-n` style props works by pulling in values from your design system or "theme."
 
 The theme contains contains standard values for colors, spacing, typography and more.
 
 `style-kit-n` includes a default theme that can be overwritten by passing a `theme` prop to the
 applicable Provider component for your environment. The provided `theme` will be merged into the
 default `theme`.
-
-More documentation on theme and prop styles in development.
 
 ```tsx
 import { WebProvider } from '@style-kit-n/web';
@@ -148,7 +150,7 @@ const App = () => {
 ```
 
 ### Dynamic Styles
-`style-kit-n` binds dynamic styles to React props in clean and intuitive way.
+`style-kit-n` binds dynamic styles to React props in a clean and intuitive way.
 
 A function can be provided as the style parameters to specify styles that respond to props.
 
@@ -204,7 +206,7 @@ const Button = styled(
 
     // Styles will only be added on focus
     focus: {
-      bordered: true
+      border: true
       borderColor: 'focus'
     }
   }
