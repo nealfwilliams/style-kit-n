@@ -10,16 +10,14 @@ import {
 } from './types';
 
 export function createComponent<
-  BaseElement extends string,
+  BaseEl extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>,
   StyleProps extends Object = {},
-  Props extends Object = {},
-  ParentProps extends Object = {},
+  CustomProps extends Object = {},
   GeneratedStyles extends Object = {},
   GeneratedClassNames extends string = string,
   Engine extends StyleEngine<
+    BaseEl,
     StyleProps,
-    BaseElement,
-    any,
     GeneratedClassNames,
     GeneratedStyles
   > = any
@@ -33,29 +31,26 @@ export function createComponent<
   computeStylesFn,
   inheritedComputeStylesFns = [],
 }: {
-  baseElement: BaseElement;
+  baseElement: BaseEl;
   engine: Engine;
 
   styles?: StylesParam<StyleProps, GeneratedStyles>;
   inheritedStyles?: StylesParam<StyleProps, GeneratedStyles>;
 
   computeStylesFn?: ComputeStylesFn<
-    Props & ParentProps & StyleProps,
+    CustomProps & StyleProps,
     StyleProps,
     GeneratedStyles
   >;
   inheritedComputeStylesFns?: ComputeStylesFn<
-    Props & ParentProps & StyleProps,
+    CustomProps & StyleProps,
     StyleProps,
     GeneratedStyles
   >[];
 }) {
-  const baseProps = engine.getBaseProps(baseElement);
-  const basePropNames = new Set(baseProps);
+  type ComponentProps = React.ComponentProps<BaseEl & CustomProps & StyleProps>
 
-  const Component: React.FC<Props &
-    ParentProps &
-    StyleProps> = _propsOnComponent => {
+  const Component: React.FC<ComponentProps> = _propsOnComponent => {
     const [isHovered, setIsHovered] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
     const { activeBreakpoints, theme } = useContext(StyleKitNContext);
@@ -217,17 +212,13 @@ export function createComponent<
     }, [inheritedProps, propsFromDefinition, propsOnComponent]);
 
     // Only keep component props that are valid on HTML, RN view, etc.
-    const baseElementProps = Object.keys(propsOnComponent).reduce(
-      (props, key) => {
-        if (basePropNames.has(key)) {
-          (props as any)[key] =
-            propsOnComponent[key as keyof typeof propsOnComponent];
-        }
-
-        return props;
-      },
-      {}
-    );
+    // const baseElementProps = Object.keys(propsOnComponent).reduce(
+    //   (props, key) => {
+    //     return props[];
+    //   },
+    //   {}
+    // );
+    const baseElementProps = {};
 
     const el = React.createElement(baseElement as any, {
       ...baseElementProps,
@@ -251,10 +242,10 @@ export function createComponent<
   };
 
   const styledComponent = Component as StyledComponent<
-    Props & ParentProps & StyleProps,
-    BaseElement,
+    BaseEl,
     StyleProps,
-    GeneratedStyles
+    GeneratedStyles,
+    CustomProps
   >;
 
   styledComponent.baseElement = baseElement;

@@ -1,4 +1,4 @@
-import { CSSProperties } from 'react';
+import { CSSProperties, JSXElementConstructor } from 'react';
 
 export type QualifiedStyleProps<StyleProps extends Object> = StyleProps & {
   hover?: StyleProps;
@@ -45,6 +45,8 @@ export type StylesParam<
   media?: MediaProperty<StyleProps, GeneratedStyles>;
 };
 
+export type GenericBaseComponent = keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>;
+
 export type ComputeStylesFn<
   P,
   StyleProps extends Object,
@@ -52,10 +54,11 @@ export type ComputeStylesFn<
 > = (props: P) => StylesParam<StyleProps, GeneratedStyles>;
 
 export type StyledComponent<
-  P,
-  BaseElement,
+  BaseElement extends GenericBaseComponent,
   StyleProps extends Object,
-  GeneratedStyles extends Object
+  GeneratedStyles extends Object,
+  CustomProps extends Object,
+  P = React.ComponentProps<BaseElement> & StyleProps & CustomProps
 > = React.FC<P> & {
   styles: StylesParam<StyleProps, GeneratedStyles>;
   computeStylesFns: ComputeStylesFn<P, StyleProps, GeneratedStyles>[];
@@ -79,11 +82,8 @@ export type EventListeners = {
 };
 
 export interface StyleEngine<
+  BaseEl extends keyof JSX.IntrinsicElements | JSXElementConstructor<any> = any,
   StyleProps = any,
-  BaseElement extends string = any,
-  BaseElementProps extends {
-    [key in BaseElement]: Object;
-  } = any,
   ClassNames = string,
   GeneratedStyles extends Object = CSSProperties,
   Theme = any
@@ -91,8 +91,10 @@ export interface StyleEngine<
   generateStyles: GenerateStyles<StyleProps, GeneratedStyles, Theme>;
   generateClasses: GenerateClassNames<StyleProps, ClassNames>;
   resolveClassConflicts: ResolveClassConflicts<ClassNames>;
-  getBaseProps: (key: BaseElement) => (keyof BaseElementProps[BaseElement])[];
   getMediaWidth: () => number;
   listenForResize: (setWidthCb: (width: number) => void) => void;
   cleanupResizeListener: () => void;
+  determineIfBaseEl: (el: any) => boolean;
+
+  _baseEl?: BaseEl,
 }

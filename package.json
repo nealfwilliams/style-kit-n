@@ -6,5 +6,8 @@
   "devDependencies": {
     "lerna": "^4.0.0",
     "tsdx": "^0.14.1"
+  },
+  "dependencies": {
+    "@style-kit-n/core": "^0.1.0"
   }
 }

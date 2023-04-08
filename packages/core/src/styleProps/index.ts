@@ -4,7 +4,7 @@ import { BaseStyleProps } from './types';
 
 export { BaseStyleProps } from './types';
 
-export const handleBaseStyleProp: {
+export const baseStylePropHandlers: {
   [prop in keyof BaseStyleProps]: (
     value: any,
     theme: BaseTheme,
