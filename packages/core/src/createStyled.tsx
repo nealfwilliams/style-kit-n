@@ -10,7 +10,7 @@ import {
 
 export function createStyled<
   BaseEl extends GenericBaseComponent,
-  StyleProps extends Record<string, string>,
+  StyleProps extends Record<string, any>,
   Engine extends StyleEngine<
     BaseEl,
     StyleProps,
@@ -18,7 +18,7 @@ export function createStyled<
     GeneratedStyles
   > = any,
   GeneratedClassNames extends string = string,
-  GeneratedStyles extends Object = CSSProperties
+  GeneratedStyles extends Record<string, any> = CSSProperties
 >(engine: Engine) {
   return function<
     CustomProps extends Object = {},
@@ -48,7 +48,7 @@ export function createStyled<
 
 function _styled<
   BaseEl extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>,
-  StyleProps extends Record<string, string>,
+  StyleProps extends Record<string, any>,
   CustomProps extends Object,
   GeneratedClassNames extends string,
   GeneratedStyles extends Object,

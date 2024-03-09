@@ -11,7 +11,7 @@ import {
 
 export function createComponent<
   BaseEl extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>,
-  StyleProps extends Record<string, string> = {},
+  StyleProps extends Record<string, any> = {},
   CustomProps extends Record<string, any> = {},
   GeneratedStyles extends Object = {},
   GeneratedClassNames extends string = string,
