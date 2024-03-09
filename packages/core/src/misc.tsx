@@ -172,7 +172,11 @@ export function mergeMediaIntoStylesParam(
   }
 
   // complex keys either use max keyword or have multiple pieces
-  const complexKeys = Object.keys(mediaParam).filter(key => key.length > 1);
+  const complexKeys = Object
+    .keys(mediaParam)
+    .filter(key =>
+      key.includes('max') || key.split(',').length > 1
+    );
 
   for (const key of complexKeys) {
     if (evaluateMediaQuery(key, activeBreakpoints)) {

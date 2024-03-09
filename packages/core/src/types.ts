@@ -1,4 +1,4 @@
-import { CSSProperties, JSXElementConstructor } from 'react';
+import { CSSProperties } from 'react';
 
 export type QualifiedStyleProps<StyleProps extends Object> = StyleProps & {
   hover?: StyleProps;
@@ -66,8 +66,10 @@ export type StyledComponent<
 };
 
 type GenerateStyles<StyleProps, GeneratedStyles, Theme = any> = (
-  styleProps: StyleProps,
-  theme: Theme
+  params: {
+    props: StyleProps,
+    theme: Theme
+  }
 ) => GeneratedStyles;
 type GenerateClassNames<StyleProps, ClassName = string> = (
   styleProps: StyleProps
@@ -82,7 +84,8 @@ export type EventListeners = {
 };
 
 export interface StyleEngine<
-  BaseEl extends keyof JSX.IntrinsicElements | JSXElementConstructor<any> = any,
+  // @ts-ignore
+  BaseElement extends GenericBaseComponent,
   StyleProps = any,
   ClassNames = string,
   GeneratedStyles extends Object = CSSProperties,
@@ -95,6 +98,5 @@ export interface StyleEngine<
   listenForResize: (setWidthCb: (width: number) => void) => void;
   cleanupResizeListener: () => void;
   determineIfBaseEl: (el: any) => boolean;
-
-  _baseEl?: BaseEl,
+  getBaseProps: (el: any) => Set<string>
 }

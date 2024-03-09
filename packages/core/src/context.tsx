@@ -19,7 +19,7 @@ export const StyleKitNContext = React.createContext<{
 
 export const StyleKitNProvider: React.FC<{
   theme: BaseTheme;
-  engine: StyleEngine;
+  engine: StyleEngine<any>;
   children?: React.ReactNode;
 }> = ({ theme, engine, children }) => {
   const [mediaWidth, setMediaWidth] = useState(engine.getMediaWidth());
