@@ -71,6 +71,7 @@ type GenerateStyles<StyleProps, GeneratedStyles, Theme = any> = (
     theme: Theme
   }
 ) => GeneratedStyles;
+
 type GenerateClassNames<StyleProps, ClassName = string> = (
   styleProps: StyleProps
 ) => ClassName[];

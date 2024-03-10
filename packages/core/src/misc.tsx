@@ -1,12 +1,13 @@
 import { useMemo } from 'react';
 
-import { MEDIA_BREAKPOINTS } from './constants';
 import {
   ActiveBreakpoints,
   MediaBreakpoint,
   MediaProperty,
   StylesParam,
 } from './types';
+
+import { MEDIA_BREAKPOINTS } from './context';
 
 export function mergeMediaProperties<
   StyleProps extends Object,

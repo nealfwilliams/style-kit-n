@@ -3,8 +3,7 @@ import { render, fireEvent, act } from '@testing-library/react';
 
 import { StyleEngine } from './types';
 import { createStyled } from './createStyled';
-import { StyleKitNProvider } from './context';
-import { baseTheme } from './theme';
+import { StyleKitNProvider, baseTheme } from './context';
 
 type ExampleProps = {
   s?: 'small' | 'large';

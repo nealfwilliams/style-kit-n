@@ -1,13 +1,35 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { MEDIA_BREAKPOINTS } from './constants';
-import { BaseTheme } from './theme/types';
-import { ActiveBreakpoints, StyleEngine } from './types';
+import { ActiveBreakpoints, MediaBreakpoint, StyleEngine } from './types';
+
+export const MEDIA_BREAKPOINTS: MediaBreakpoint[] = [
+  'sm',
+  'md',
+  'lg',
+  'xl',
+  '2xl',
+];
+
+type Theme = {
+  mediaBreakpoints?: {
+    [key in MediaBreakpoint]: number;
+  };
+} & Record<string, any>;
+
+export const baseTheme: Theme = {
+  mediaBreakpoints: {
+    sm: 576,
+    md: 768,
+    lg: 992,
+    xl: 1200,
+    '2xl': 1400,
+  },
+};
 
 export const StyleKitNContext = React.createContext<{
-  theme: BaseTheme;
+  theme: Theme;
   activeBreakpoints: ActiveBreakpoints;
 }>({
-  theme: {} as BaseTheme,
+  theme: {} as Theme,
   activeBreakpoints: {
     sm: false,
     md: false,
@@ -18,10 +40,18 @@ export const StyleKitNContext = React.createContext<{
 });
 
 export const StyleKitNProvider: React.FC<{
-  theme: BaseTheme;
+  theme: Theme;
   engine: StyleEngine<any>;
   children?: React.ReactNode;
-}> = ({ theme, engine, children }) => {
+}> = ({ theme: _theme, engine, children }) => {
+  const theme = useMemo(() => ({
+    ..._theme,
+    mediaBreakpoints: {
+      ...baseTheme.mediaBreakpoints,
+      ..._theme?.mediaBreakpoints,
+    },
+  } as Theme), [_theme]);
+
   const [mediaWidth, setMediaWidth] = useState(engine.getMediaWidth());
 
   useEffect(() => {
@@ -34,7 +64,8 @@ export const StyleKitNProvider: React.FC<{
     const activeBreakpoints: Partial<ActiveBreakpoints> = {};
 
     for (const breakpoint of MEDIA_BREAKPOINTS) {
-      if (mediaWidth >= theme.mediaBreakpoints[breakpoint]) {
+      const breakpointWidth = theme?.mediaBreakpoints ? theme.mediaBreakpoints[breakpoint] : 0
+      if (mediaWidth >= breakpointWidth) {
         activeBreakpoints[breakpoint] = true;
       }
     }
