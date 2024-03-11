@@ -18,9 +18,6 @@ the following methods:
 - `listenForResize`: environment-specific listener to respond to media changes
   `cleanupResizeListener`: cleanup method for above listener
 
-## `baseStyleProps`, `handleBaseStyleProp`
-A type for style props that are reused across environments, and method to convert these props into styles.
-
 ## `baseTheme`, `BaseTheme`
 A default theme (and corresponding type) with values that are reused across environments.
 

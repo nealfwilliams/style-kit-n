@@ -52,7 +52,9 @@ export function createComponent<
 
   type ComponentProps = BaseProps & CustomProps & StyleProps
 
-  const useExtractBaseProps = (props: any) => {
+  const useExtractBaseProps = (_props: any) => {
+    const { children, ...props } = _props;
+
     return useMemo(() => {
       const basePropSet = engine.getBaseProps(baseElement)
 
@@ -67,7 +69,7 @@ export function createComponent<
         }
       }
 
-      return { baseProps, restProps };
+      return { baseProps, restProps, children };
     }, [props])
   }
 
@@ -76,7 +78,11 @@ export function createComponent<
     const [isFocused, setIsFocused] = useState(false);
     const { activeBreakpoints, theme } = useContext(StyleKitNContext);
 
-    const {baseProps, restProps} = useExtractBaseProps(_propsOnComponent)
+    const {
+      baseProps,
+      restProps,
+      children
+    } = useExtractBaseProps(_propsOnComponent)
 
     const propsOnComponent = useMemoizedObject(restProps);
 
@@ -245,6 +251,7 @@ export function createComponent<
 
     const el = React.createElement(baseElement as any, {
       ...baseProps,
+      children,
       style: allStyles,
       className: generatedClassNames,
       onBlur: () => {
