@@ -1,7 +1,0 @@
-{
-  "name": "@style-kit-n/web",
-  "version": "0.1.0",
-  "dependencies": {
-    "@style-kit-n/core": "^0.1.0"
-  }
-}

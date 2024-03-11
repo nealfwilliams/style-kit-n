@@ -1,6 +1,6 @@
 
 
-const htmlAttributes = [
+export const htmlAttributes = new Set([
   'accept',
   'acceptCharset',
   'accessKey',
@@ -123,9 +123,4 @@ const htmlAttributes = [
   'width',
   'wmode',
   'wrap'
-] as const;
-
-const DOMAttributes = 
-
-
-export type HtmlAttribute = typeof htmlAttributes[number];
+]);
