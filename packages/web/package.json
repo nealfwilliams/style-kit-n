@@ -41,7 +41,7 @@
     }
   ],
   "dependencies": {
-    "@style-kit-n/core": "^0.7.0"
+    "@style-kit-n/core": "^0.8.0"
   },
   "peerDependencies": {
     "react": "^18.2.0",
