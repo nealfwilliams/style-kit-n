@@ -1,12 +1,13 @@
 import { useMemo } from 'react';
 
-import { MEDIA_BREAKPOINTS } from './constants';
 import {
   ActiveBreakpoints,
   MediaBreakpoint,
   MediaProperty,
   StylesParam,
 } from './types';
+
+import { MEDIA_BREAKPOINTS } from './context';
 
 export function mergeMediaProperties<
   StyleProps extends Object,
@@ -172,7 +173,11 @@ export function mergeMediaIntoStylesParam(
   }
 
   // complex keys either use max keyword or have multiple pieces
-  const complexKeys = Object.keys(mediaParam).filter(key => key.length > 1);
+  const complexKeys = Object
+    .keys(mediaParam)
+    .filter(key =>
+      key.includes('max') || key.split(',').length > 1
+    );
 
   for (const key of complexKeys) {
     if (evaluateMediaQuery(key, activeBreakpoints)) {

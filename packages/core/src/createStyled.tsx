@@ -1,87 +1,89 @@
-import { CSSProperties } from 'react';
+import { CSSProperties, JSXElementConstructor } from 'react';
 import { createComponent } from './createComponent';
 import {
   ComputeStylesFn,
+  GenericBaseComponent,
   StyledComponent,
   StyleEngine,
   StylesParam,
 } from './types';
 
 export function createStyled<
-  BaseElement extends string,
-  BaseElementProps extends {
-    [key in BaseElement]: Object;
-  },
-  StyleProps extends Object,
+  BaseEl extends GenericBaseComponent,
+  StyleProps extends Record<string, any>,
   Engine extends StyleEngine<
+    BaseEl,
     StyleProps,
-    BaseElement,
-    BaseElementProps,
     GeneratedClassNames,
     GeneratedStyles
   > = any,
   GeneratedClassNames extends string = string,
-  GeneratedStyles extends Object = CSSProperties
+  GeneratedStyles extends Record<string, any> = CSSProperties
 >(engine: Engine) {
   return function<
-    Props extends Object = {},
-    ParentProps extends Object = {},
-    Element extends BaseElement = any
+    CustomProps extends Object = {},
+    ParentCustomProps extends Object = {}
   >(
-    element:
-      | Element
-      | StyledComponent<ParentProps, Element, StyleProps, GeneratedStyles>,
+    component:
+      | BaseEl
+      | StyledComponent<BaseEl, StyleProps, GeneratedStyles, ParentCustomProps>,
     stylesParam?:
       | StylesParam<StyleProps, GeneratedStyles>
-      | ((props: Props) => StylesParam<StyleProps, GeneratedStyles>)
+      | ((props: CustomProps & ParentCustomProps) => StylesParam<StyleProps, GeneratedStyles>),
   ) {
     return _styled<
-      Element,
-      Props & BaseElementProps[Element],
-      ParentProps,
+      BaseEl,
       StyleProps,
+      CustomProps,
       GeneratedClassNames,
-      GeneratedStyles
+      GeneratedStyles,
+      ParentCustomProps
     >(
       engine as any,
-      element,
-      stylesParam || ({} as StylesParam<StyleProps, GeneratedStyles>)
+      component,
+      stylesParam || ({} as StylesParam<StyleProps, GeneratedStyles>),
     );
   };
 }
 
 function _styled<
-  BaseElement extends string,
-  Props extends Object,
-  ParentProps extends Object,
-  StyleProps extends Object,
+  BaseEl extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>,
+  StyleProps extends Record<string, any>,
+  CustomProps extends Object,
   GeneratedClassNames extends string,
-  GeneratedStyles extends Object
+  GeneratedStyles extends Object,
+  ParentCustomProps extends Object,
 >(
   engine: StyleEngine<
+    BaseEl,
     StyleProps,
-    BaseElement,
-    any,
     GeneratedClassNames,
     GeneratedStyles
   >,
-  element:
-    | BaseElement
-    | StyledComponent<ParentProps, BaseElement, StyleProps, GeneratedStyles>,
+  component:
+    | BaseEl
+    | StyledComponent<BaseEl, StyleProps, GeneratedStyles, ParentCustomProps>,
   stylesParam:
     | StylesParam<StyleProps, GeneratedStyles>
-    | ((props: Props) => StylesParam<StyleProps, GeneratedStyles>)
+    | ((props: CustomProps & ParentCustomProps) => StylesParam<StyleProps, GeneratedStyles>),
 ): StyledComponent<
-  Props & ParentProps & StyleProps,
-  BaseElement,
+  BaseEl,
   StyleProps,
-  GeneratedStyles
+  GeneratedStyles,
+  CustomProps & ParentCustomProps
 > {
+  type Engine = StyleEngine<
+    BaseEl,
+    StyleProps,
+    GeneratedClassNames,
+    GeneratedStyles
+  >
+
   let computeStylesFn:
-    | ComputeStylesFn<Props & ParentProps, StyleProps, GeneratedStyles>
+    | ComputeStylesFn<CustomProps & ParentCustomProps, StyleProps, GeneratedStyles>
     | undefined;
   let inheritedComputeStylesFns: ComputeStylesFn<
-    Props & ParentProps,
+    ParentCustomProps,
     StyleProps,
     GeneratedStyles
   >[] = [];
@@ -89,35 +91,43 @@ function _styled<
   let styles = {} as StylesParam<StyleProps, GeneratedStyles>;
   let inheritedStyles = {} as StylesParam<StyleProps, GeneratedStyles>;
 
+  // If stylesParam is a function, we will compute styled dynamically
   if (typeof stylesParam === 'function') {
     computeStylesFn = stylesParam;
   } else {
     styles = stylesParam;
   }
 
-  let baseElement: BaseElement;
+  let baseElement: BaseEl;
 
-  if (typeof element === 'string') {
-    baseElement = element as BaseElement;
+  // Styled function can take either base element or another styled component
+  // Engine will determine if it's a base element or styled component
+  if (engine.determineIfBaseEl(component)) {
+    baseElement = component as BaseEl;
   } else {
-    const parentComponent = element as StyledComponent<
-      ParentProps,
-      BaseElement,
+    // Otherwise, we will inherit base element and styles from parent component
+    const parentComponent = component as StyledComponent<
+      BaseEl,
       StyleProps,
-      GeneratedStyles
+      GeneratedStyles,
+      ParentCustomProps
     >;
     baseElement = parentComponent.baseElement;
     inheritedStyles = parentComponent.styles;
-    inheritedComputeStylesFns = parentComponent.computeStylesFns;
+    inheritedComputeStylesFns = parentComponent.computeStylesFns as ComputeStylesFn<
+      ParentCustomProps,
+      StyleProps,
+      GeneratedStyles
+    >[];
   }
 
-  const component = createComponent<
-    BaseElement,
+  const styledComponent = createComponent<
+    BaseEl,
     StyleProps,
-    Props,
-    ParentProps,
+    CustomProps & ParentCustomProps,
     GeneratedStyles,
-    GeneratedClassNames
+    GeneratedClassNames,
+    Engine
   >({
     baseElement,
 
@@ -130,5 +140,5 @@ function _styled<
     engine,
   });
 
-  return component;
+  return styledComponent;
 }

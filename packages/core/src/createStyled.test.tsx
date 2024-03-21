@@ -3,8 +3,7 @@ import { render, fireEvent, act } from '@testing-library/react';
 
 import { StyleEngine } from './types';
 import { createStyled } from './createStyled';
-import { StyleKitNProvider } from './context';
-import { baseTheme } from './theme';
+import { StyleKitNProvider, baseTheme } from './context';
 
 type ExampleProps = {
   s?: 'small' | 'large';
@@ -18,23 +17,14 @@ const LARGE_FONT_SIZE = '18px';
 const SMALL_CLASS_NAME = 'small';
 const LARGE_CLASS_NAME = 'large';
 
-type BaseElementProps = {
-  div: {
-    id: string;
-    tabIndex: number;
-    children: React.ReactNode;
-  };
-};
-
 const testEngine: StyleEngine<
-  ExampleProps,
   'div',
-  BaseElementProps,
+  ExampleProps,
   string,
   CSSProperties,
   any
 > = {
-  generateStyles(styleProps) {
+  generateStyles({props: styleProps, theme: {}}) {
     const styles: CSSProperties = {};
     if (styleProps.s === 'small') {
       styles.fontSize = SMALL_FONT_SIZE;
@@ -63,12 +53,16 @@ const testEngine: StyleEngine<
     return [];
   },
 
+  determineIfBaseEl(el) {
+    return typeof el === 'string'
+  },
+
   resolveClassConflicts(classNames) {
     return classNames.slice(classNames.length - 1);
   },
 
   getBaseProps() {
-    return ['id', 'children', 'tabIndex'];
+    return new Set(['id', 'children', 'tabIndex'] as const);
   },
 
   getMediaWidth() {
@@ -81,7 +75,6 @@ const testEngine: StyleEngine<
 
 const styled = createStyled<
   'div',
-  BaseElementProps,
   ExampleProps,
   typeof testEngine
 >(testEngine);

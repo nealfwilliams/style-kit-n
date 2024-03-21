@@ -1,10 +1,6 @@
 {
-  "name": "@style-kit-n/core",
-  "author": "Neal Williams",
+  "name": "@style-kit-n/web",
   "version": "0.9.0",
-  "license": "MIT",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
   "files": [
     "dist",
     "src"
@@ -21,9 +17,6 @@
     "size": "size-limit",
     "analyze": "size-limit --why"
   },
-  "peerDependencies": {
-    "react": ">=18"
-  },
   "husky": {
     "hooks": {
       "pre-commit": "tsdx lint"
@@ -35,17 +28,25 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "module": "dist/core.esm.js",
+  "main": "dist/index.js",
+  "module": "dist/web.esm.js",
   "size-limit": [
     {
-      "path": "dist/core.cjs.production.min.js",
+      "path": "dist/web.cjs.production.min.js",
       "limit": "10 KB"
     },
     {
-      "path": "dist/core.esm.js",
+      "path": "dist/web.esm.js",
       "limit": "10 KB"
     }
   ],
+  "dependencies": {
+    "@style-kit-n/core": "^0.9.0"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
   "devDependencies": {
     "@size-limit/preset-small-lib": "^8.2.4",
     "@testing-library/react": "^14.0.0",

@@ -10,16 +10,14 @@ import {
 } from './types';
 
 export function createComponent<
-  BaseElement extends string,
-  StyleProps extends Object = {},
-  Props extends Object = {},
-  ParentProps extends Object = {},
+  BaseEl extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>,
+  StyleProps extends Record<string, any> = {},
+  CustomProps extends Record<string, any> = {},
   GeneratedStyles extends Object = {},
   GeneratedClassNames extends string = string,
   Engine extends StyleEngine<
+    BaseEl,
     StyleProps,
-    BaseElement,
-    any,
     GeneratedClassNames,
     GeneratedStyles
   > = any
@@ -33,34 +31,60 @@ export function createComponent<
   computeStylesFn,
   inheritedComputeStylesFns = [],
 }: {
-  baseElement: BaseElement;
+  baseElement: BaseEl;
   engine: Engine;
 
   styles?: StylesParam<StyleProps, GeneratedStyles>;
   inheritedStyles?: StylesParam<StyleProps, GeneratedStyles>;
 
   computeStylesFn?: ComputeStylesFn<
-    Props & ParentProps & StyleProps,
+    CustomProps & StyleProps,
     StyleProps,
     GeneratedStyles
   >;
   inheritedComputeStylesFns?: ComputeStylesFn<
-    Props & ParentProps & StyleProps,
+    CustomProps & StyleProps,
     StyleProps,
     GeneratedStyles
   >[];
 }) {
-  const baseProps = engine.getBaseProps(baseElement);
-  const basePropNames = new Set(baseProps);
+  type BaseProps = React.ComponentProps<BaseEl>
 
-  const Component: React.FC<Props &
-    ParentProps &
-    StyleProps> = _propsOnComponent => {
+  type ComponentProps = BaseProps & CustomProps & StyleProps
+
+  const useExtractBaseProps = (_props: any) => {
+    const { children, ...props } = _props;
+
+    return useMemo(() => {
+      const basePropSet = engine.getBaseProps(baseElement)
+
+      const baseProps = {} as React.ComponentProps<BaseEl>;
+      const restProps = {} as CustomProps & StyleProps;
+
+      for (const key in props) {
+        if (basePropSet.has(key)) {
+          baseProps[key] = props[key];
+        } else {
+          (restProps as any)[key] = props[key];
+        }
+      }
+
+      return { baseProps, restProps, children };
+    }, [props])
+  }
+
+  const Component: React.FC<ComponentProps> = _propsOnComponent => {
     const [isHovered, setIsHovered] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
     const { activeBreakpoints, theme } = useContext(StyleKitNContext);
 
-    const propsOnComponent = useMemoizedObject(_propsOnComponent);
+    const {
+      baseProps,
+      restProps,
+      children
+    } = useExtractBaseProps(_propsOnComponent)
+
+    const propsOnComponent = useMemoizedObject(restProps);
 
     const {
       styleProps,
@@ -133,7 +157,10 @@ export function createComponent<
     } as StyleProps);
 
     const propStylesFromInheritance: GeneratedStyles = useMemo(
-      () => engine.generateStyles(inheritedProps, theme),
+      () => engine.generateStyles({
+        props: inheritedProps,
+        theme
+      }),
       [inheritedProps, theme]
     );
 
@@ -146,12 +173,18 @@ export function createComponent<
     } as StyleProps);
 
     const propStylesFromDefinition: GeneratedStyles = useMemo(
-      () => engine.generateStyles(propsFromDefinition, theme),
+      () => engine.generateStyles({
+        props: propsFromDefinition,
+        theme
+      }),
       [propsFromDefinition, theme]
     );
 
     const propStylesFromComponentProps: GeneratedStyles = React.useMemo(
-      () => engine.generateStyles(propsOnComponent, theme),
+      () => engine.generateStyles({
+        props: propsOnComponent,
+        theme
+      }),
       [propsOnComponent, theme]
     );
 
@@ -216,21 +249,9 @@ export function createComponent<
         .join(' ');
     }, [inheritedProps, propsFromDefinition, propsOnComponent]);
 
-    // Only keep component props that are valid on HTML, RN view, etc.
-    const baseElementProps = Object.keys(propsOnComponent).reduce(
-      (props, key) => {
-        if (basePropNames.has(key)) {
-          (props as any)[key] =
-            propsOnComponent[key as keyof typeof propsOnComponent];
-        }
-
-        return props;
-      },
-      {}
-    );
-
     const el = React.createElement(baseElement as any, {
-      ...baseElementProps,
+      ...baseProps,
+      children,
       style: allStyles,
       className: generatedClassNames,
       onBlur: () => {
@@ -250,11 +271,12 @@ export function createComponent<
     return el;
   };
 
-  const styledComponent = Component as StyledComponent<
-    Props & ParentProps & StyleProps,
-    BaseElement,
+  const styledComponent = Component as unknown as StyledComponent<
+    BaseEl,
     StyleProps,
-    GeneratedStyles
+    GeneratedStyles,
+    CustomProps,
+    ComponentProps
   >;
 
   styledComponent.baseElement = baseElement;
