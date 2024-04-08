@@ -4,13 +4,11 @@ import { createStyled, StyleEngine, StyleKitNProvider } from '@style-kit-n/core'
 
 import { htmlAttributes } from './elementAttributes';
 
-type WebTheme = {
+export type WebTheme = {
   colors: {
     [key: string]: string
   },
-  space: {
-    [key: string]: string
-  },
+  space: string[],
   fontFamily: {
     [key: string]: string
   },
@@ -39,20 +37,20 @@ type StyleProps = {
   borderColor?: string,
   w?: string,
   h?: string,
-  m?: string,
-  mt?: string,
-  mb?: string,
-  ml?: string,
-  mr?: string,
-  my?: string,
-  mx?: string,
-  p?: string,
-  pt?: string,
-  pb?: string,
-  pl?: string,
-  pr?: string,
-  py?: string,
-  px?: string,
+  m?: number,
+  mt?: number,
+  mb?: number,
+  ml?: number,
+  mr?: number,
+  my?: number,
+  mx?: number,
+  p?: number,
+  pt?: number,
+  pb?: number,
+  pl?: number,
+  pr?: number,
+  py?: number,
+  px?: number,
   typography?: string,
   fontSize?: string,
   lineHeight?: string,
