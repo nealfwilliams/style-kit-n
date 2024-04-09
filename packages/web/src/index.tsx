@@ -1,6 +1,6 @@
 import React, { CSSProperties } from 'react';
 // import { createStyled, BaseStyleProps, StyleEngine } from '../../core/src';
-import { createStyled, StyleEngine, StyleKitNProvider } from '@style-kit-n/core';
+import { createStyled as _createStyled, StyleEngine, StyleKitNProvider } from '@style-kit-n/core';
 
 import { htmlAttributes } from './elementAttributes';
 
@@ -31,7 +31,7 @@ export type WebTheme = {
   }
 }
 
-type StyleProps = {
+export interface WebStyleProps {
   bg?: string,
   color?: string,
   borderColor?: string,
@@ -61,12 +61,12 @@ type StyleProps = {
 }
 
 type StyleHelper = (params: {
-  props: StyleProps,
+  props: WebStyleProps,
   theme: WebTheme
 }) => React.CSSProperties
 
 const propertyStyleMap: {
-  [key in keyof StyleProps]: StyleHelper
+  [key in keyof WebStyleProps]: StyleHelper
 } = {
   display: ({props}) => ({
     display: props.display
@@ -230,7 +230,7 @@ const propertyStyleMap: {
 
 const webEngine: StyleEngine<
   keyof JSX.IntrinsicElements,
-  StyleProps,
+  WebStyleProps,
   string,
   React.CSSProperties,
   WebTheme
@@ -266,13 +266,17 @@ const webEngine: StyleEngine<
   getBaseProps: () => htmlAttributes
 };
 
-export const styled = createStyled<
-  keyof JSX.IntrinsicElements,
-  StyleProps,
-  typeof webEngine,
-  string,
-  React.CSSProperties
->(webEngine)
+export function createStyled<S extends WebStyleProps>() {
+  return _createStyled<
+    keyof JSX.IntrinsicElements,
+    S,
+    typeof webEngine,
+    string,
+    React.CSSProperties
+  >(webEngine)
+}
+
+export const styled = createStyled<WebStyleProps>()
 
 export const Row = styled('div', {
   display: 'flex',
