@@ -9,16 +9,16 @@ export type WebTheme = {
     [key: string]: string
   },
   space: string[],
-  fontFamily: {
+  fontFamilies: {
     [key: string]: string
   },
-  fontSize: {
+  fontSizes: {
     [key: string]: string
   },
-  fontWeight: {
+  fontWeights: {
     [key: string]: string
   },
-  lineHeight: {
+  lineHeights: {
     [key: string]: string
   },
   typography: {
@@ -196,35 +196,35 @@ const propertyStyleMap: {
   }) => {
     const typography = theme.typography[props.typography!]
     return {
-      fontFamily: theme.fontFamily[typography.fontFamily],
-      fontSize: theme.fontSize[typography.fontSize],
-      fontWeight: theme.fontWeight[typography.fontWeight] as any,
-      lineHeight: theme.lineHeight[typography.lineHeight]
+      fontFamily: theme.fontFamilies[typography.fontFamily],
+      fontSize: theme.fontSizes[typography.fontSize],
+      fontWeight: theme.fontWeights[typography.fontWeight] as any,
+      lineHeight: theme.lineHeights[typography.lineHeight]
     }
   },
   fontSize: ({
     props,
     theme
   }) => ({
-    fontSize: theme.fontSize[props.fontSize!]
+    fontSize: theme.fontSizes[props.fontSize!]
   }),
   lineHeight: ({
     props,
     theme
   }) => ({
-    lineHeight: theme.lineHeight[props.lineHeight!]
+    lineHeight: theme.lineHeights[props.lineHeight!]
   }),
   fontFamily: ({
     props,
     theme
   }) => ({
-    fontFamily: theme.fontFamily[props.fontFamily!]
+    fontFamily: theme.fontFamilies[props.fontFamily!]
   }),
   fontWeight: ({
     props,
     theme
   }) => ({
-    fontWeight: theme.fontWeight[props.fontWeight!] as any
+    fontWeight: theme.fontWeights[props.fontWeight!] as any
   }),
 }
 
