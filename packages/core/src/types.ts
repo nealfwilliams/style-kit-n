@@ -20,6 +20,10 @@ export type ActiveBreakpoints = {
   [key in MediaBreakpoint]: boolean;
 };
 
+export type ActiveBreakpointsParam = {
+  activeBreakpoints?: ActiveBreakpoints;
+};
+
 export type MediaProperty<
   StyleProps extends Object,
   GeneratedStyles extends Object
@@ -51,7 +55,7 @@ export type ComputeStylesFn<
   P,
   StyleProps extends Object,
   GeneratedStyles extends Object
-> = (props: P) => StylesParam<StyleProps, GeneratedStyles>;
+> = (props: P & ActiveBreakpointsParam) => StylesParam<StyleProps, GeneratedStyles>;
 
 export type StyledComponent<
   BaseElement extends GenericBaseComponent,

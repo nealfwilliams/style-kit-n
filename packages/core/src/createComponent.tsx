@@ -112,7 +112,12 @@ export function createComponent<
 
     // Compute styles if styles param passed as a function
     const computedStylesParam: StylesParam = useMemo(() => {
-      return computeStylesFn ? computeStylesFn(propsOnComponent) : {};
+      return computeStylesFn
+        ? computeStylesFn({
+          ...propsOnComponent,
+          activeBreakpoints
+        })
+        : {};
     }, [propsOnComponent]);
 
     const {

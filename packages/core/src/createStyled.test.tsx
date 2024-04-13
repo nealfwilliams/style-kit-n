@@ -139,6 +139,26 @@ describe('styled', () => {
     });
   });
 
+  it('generates styles from passed in function using breakpoint param', () => {
+    const Test = styled('div', ({ activeBreakpoints }) => {
+      return {
+        styles: {
+          color: activeBreakpoints?.md ? 'red' : 'blue',
+          fontSize: activeBreakpoints?.sm ? '14px' : '18px',
+          fontWeight: activeBreakpoints?.lg ? '600' : '400',
+        } 
+      }
+    })
+
+    const rendered = renderComponent(Test)
+
+    expect(rendered.style).toMatchObject({
+      color: 'red',
+      fontSize: '14px',
+      fontWeight: '400',
+    })
+  })
+
   it('removes props that are not props of the base element', () => {
     type TestProps = {
       shrink: boolean;
@@ -378,13 +398,22 @@ describe('styled', () => {
           color: 'red',
         },
         md: {
-          s: 'small',
+          styles: {
+            fontSize: '14px'
+          }
+        },
+        lg: {
+          styles: {
+            fontSize: '16px',
+          }
         },
       },
     });
 
     const rendered = renderComponent(Test);
-    expect(rendered.style).toMatchObject({ color: 'red' });
-    expect(rendered.style).not.toMatchObject({ fontSize: SMALL_CLASS_NAME });
+    expect(rendered.style).toMatchObject({
+      color: 'red',
+      fontSize: '14px'
+    });
   });
 });

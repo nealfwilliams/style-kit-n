@@ -1,6 +1,7 @@
 import { CSSProperties, JSXElementConstructor } from 'react';
 import { createComponent } from './createComponent';
 import {
+  ActiveBreakpointsParam,
   ComputeStylesFn,
   GenericBaseComponent,
   StyledComponent,
@@ -29,7 +30,7 @@ export function createStyled<
       | StyledComponent<BaseEl, StyleProps, GeneratedStyles, ParentCustomProps>,
     stylesParam?:
       | StylesParam<StyleProps, GeneratedStyles>
-      | ((props: CustomProps & ParentCustomProps) => StylesParam<StyleProps, GeneratedStyles>),
+      | ((props: CustomProps & ParentCustomProps & ActiveBreakpointsParam) => StylesParam<StyleProps, GeneratedStyles>),
   ) {
     return _styled<
       BaseEl,
@@ -65,7 +66,14 @@ function _styled<
     | StyledComponent<BaseEl, StyleProps, GeneratedStyles, ParentCustomProps>,
   stylesParam:
     | StylesParam<StyleProps, GeneratedStyles>
-    | ((props: CustomProps & ParentCustomProps) => StylesParam<StyleProps, GeneratedStyles>),
+    | (
+        (
+          props:
+            CustomProps &
+            ParentCustomProps &
+            ActiveBreakpointsParam
+        ) => StylesParam<StyleProps, GeneratedStyles>
+      ),
 ): StyledComponent<
   BaseEl,
   StyleProps,

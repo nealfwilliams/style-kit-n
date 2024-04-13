@@ -61,14 +61,22 @@ export const StyleKitNProvider: React.FC<{
   }, [setMediaWidth, engine]);
 
   const activeBreakpoints = useMemo(() => {
-    const activeBreakpoints: Partial<ActiveBreakpoints> = {};
+    const activeBreakpoints: Partial<ActiveBreakpoints> = {
+      sm: true
+    };
 
-    for (const breakpoint of MEDIA_BREAKPOINTS) {
-      const breakpointWidth = theme?.mediaBreakpoints ? theme.mediaBreakpoints[breakpoint] : 0
+    MEDIA_BREAKPOINTS.forEach((breakpoint, i) => {
+      if ( i === 0 ) {
+        return
+      }
+
+      const lastBreakpoint = MEDIA_BREAKPOINTS[i - 1];
+
+      const breakpointWidth = theme?.mediaBreakpoints ? theme.mediaBreakpoints[lastBreakpoint] : 0
       if (mediaWidth >= breakpointWidth) {
         activeBreakpoints[breakpoint] = true;
       }
-    }
+    })
 
     return activeBreakpoints as ActiveBreakpoints;
   }, [mediaWidth, theme.mediaBreakpoints]);
