@@ -48,15 +48,15 @@ export function createComponent<
     GeneratedStyles
   >[];
 }) {
-  type BaseProps = React.ComponentProps<BaseEl>
+  type BaseProps = React.ComponentProps<BaseEl>;
 
-  type ComponentProps = BaseProps & CustomProps & StyleProps
+  type ComponentProps = BaseProps & CustomProps & StyleProps;
 
   const useExtractBaseProps = (_props: any) => {
-    const { children, ...props } = _props;
+    const { children, style, ...props } = _props;
 
     return useMemo(() => {
-      const basePropSet = engine.getBaseProps(baseElement)
+      const basePropSet = engine.getBaseProps(baseElement);
 
       const baseProps = {} as React.ComponentProps<BaseEl>;
       const restProps = {} as CustomProps & StyleProps;
@@ -69,9 +69,9 @@ export function createComponent<
         }
       }
 
-      return { baseProps, restProps, children };
-    }, [props])
-  }
+      return { baseProps, restProps, children, style };
+    }, [props]);
+  };
 
   const Component: React.FC<ComponentProps> = _propsOnComponent => {
     const [isHovered, setIsHovered] = useState(false);
@@ -81,8 +81,9 @@ export function createComponent<
     const {
       baseProps,
       restProps,
-      children
-    } = useExtractBaseProps(_propsOnComponent)
+      style: styleAsProp,
+      children,
+    } = useExtractBaseProps(_propsOnComponent);
 
     const propsOnComponent = useMemoizedObject(restProps);
 
@@ -162,10 +163,11 @@ export function createComponent<
     } as StyleProps);
 
     const propStylesFromInheritance: GeneratedStyles = useMemo(
-      () => engine.generateStyles({
-        props: inheritedProps,
-        theme
-      }),
+      () =>
+        engine.generateStyles({
+          props: inheritedProps,
+          theme,
+        }),
       [inheritedProps, theme]
     );
 
@@ -178,18 +180,20 @@ export function createComponent<
     } as StyleProps);
 
     const propStylesFromDefinition: GeneratedStyles = useMemo(
-      () => engine.generateStyles({
-        props: propsFromDefinition,
-        theme
-      }),
+      () =>
+        engine.generateStyles({
+          props: propsFromDefinition,
+          theme,
+        }),
       [propsFromDefinition, theme]
     );
 
     const propStylesFromComponentProps: GeneratedStyles = React.useMemo(
-      () => engine.generateStyles({
-        props: propsOnComponent,
-        theme
-      }),
+      () =>
+        engine.generateStyles({
+          props: propsOnComponent,
+          theme,
+        }),
       [propsOnComponent, theme]
     );
 
@@ -206,6 +210,7 @@ export function createComponent<
 
       // Priority 1 - Styles from directly passed props
       ...propStylesFromComponentProps,
+      ...styleAsProp,
     };
 
     const shouldListenToFocus = React.useMemo(
@@ -276,7 +281,7 @@ export function createComponent<
     return el;
   };
 
-  const styledComponent = Component as unknown as StyledComponent<
+  const styledComponent = (Component as unknown) as StyledComponent<
     BaseEl,
     StyleProps,
     GeneratedStyles,

@@ -24,7 +24,7 @@ const testEngine: StyleEngine<
   CSSProperties,
   any
 > = {
-  generateStyles({props: styleProps, theme: {}}) {
+  generateStyles({ props: styleProps, theme: {} }) {
     const styles: CSSProperties = {};
     if (styleProps.s === 'small') {
       styles.fontSize = SMALL_FONT_SIZE;
@@ -54,7 +54,7 @@ const testEngine: StyleEngine<
   },
 
   determineIfBaseEl(el) {
-    return typeof el === 'string'
+    return typeof el === 'string';
   },
 
   resolveClassConflicts(classNames) {
@@ -73,11 +73,7 @@ const testEngine: StyleEngine<
   cleanupResizeListener() {},
 };
 
-const styled = createStyled<
-  'div',
-  ExampleProps,
-  typeof testEngine
->(testEngine);
+const styled = createStyled<'div', ExampleProps, typeof testEngine>(testEngine);
 
 const renderComponent = (C: any, props?: any) => {
   const testString = 'test';
@@ -164,14 +160,14 @@ describe('styled', () => {
 
     const rendered = renderComponent(Test, {
       style: {
-        color: 'red'
-      }
+        color: 'red',
+      },
     });
 
     expect(rendered.style).toMatchObject({
       color: 'red',
     });
-  })
+  });
 
   it('removes props that are not props of the base element', () => {
     type TestProps = {
