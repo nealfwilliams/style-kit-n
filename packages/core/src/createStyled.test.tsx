@@ -159,6 +159,20 @@ describe('styled', () => {
     })
   })
 
+  it('generates style when style prop passed on component directly', () => {
+    const Test = styled('div');
+
+    const rendered = renderComponent(Test, {
+      style: {
+        color: 'red'
+      }
+    });
+
+    expect(rendered.style).toMatchObject({
+      color: 'red',
+    });
+  })
+
   it('removes props that are not props of the base element', () => {
     type TestProps = {
       shrink: boolean;
