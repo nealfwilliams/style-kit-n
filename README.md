@@ -73,6 +73,22 @@ and accessibility to developers as any other part of the React ecosystem.
 CSS is not directly supported in React Native, which makes a maintainable solution for styling an even
 more acute need.
 
+### Issues during build
+Since CSS is an entirely separate language, using it in a modern build environment is often cumbersome.
+
+Some styling frameworks such as Tailwind require a build-time step that does static analysis of your codebase
+and extracts the css needed for your application. For this to work correctly, you must follow
+the library's conventions to ensure the necessary styles are included correctly.
+
+This a leaky abstraction, and the more complex your UI, the more likely these
+restrictions can be gotchas.
+
+### Issues bundling
+Depending on how CSS is bundled with your app, you may run into issues such as the common
+"Flash Of Unstyled Content" bug, where server-rendered HTML is loaded because it's accompanying CSS.
+
+With a pure JavaScript style framework, issues related to the build / bundling process are non-existent.
+
 ## How does it work?
 ### Creating components
 Components are created with a function that takes in a base element and the styles to apply to it.
@@ -99,7 +115,7 @@ const MyComponent = () => (
 
 `style-kit-n` also comes with pre-defined base components ready to import and use.
 ```tsx
-import {Column, Row} from '@style-kit-n/web'
+import { Column, Row } from '@style-kit-n/web'
 
 const MyComponent = () => (
   <Row>
@@ -114,7 +130,7 @@ All utility props can be applied to components directly. All components defined 
 from `style-kit-n` have access to all utility props.
 
 ```tsx
-import {Box} from '@style-kit-n/web'
+import { Box } from '@style-kit-n/web'
 
 const MyComponent = () => (
   <Box py={4} border>
@@ -152,7 +168,7 @@ const App = () => {
 ### Dynamic Styles
 `style-kit-n` binds dynamic styles to React props in a clean and intuitive way.
 
-A function can be provided as the style parameters to specify styles that respond to props.
+A function can be provided as the second parameter to specify styles that respond to props.
 
 ```tsx
 type ButtonProps = {
@@ -251,7 +267,7 @@ In order to support media queries, the `StyleKitNProvider` needs to included at 
 
 ### Isn't direct styles on html bad practice?
 The primary reason developers are warned against direct styles on HTML is that direct styles are
-virtually possible to maintain if the developer is managing them manually.
+virtually impossible to maintain if the developer is managing them manually.
 A framework that abstracts that management of styles entirely avoids
 this problem.
 
