@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from 'react';
+import React, { forwardRef, useContext, useMemo, useState } from 'react';
 import { mergeStylesParams, useMemoizedObject } from './misc';
 import { useStyles } from './useStyles';
 import { StyleKitNContext } from './context';
@@ -73,7 +73,7 @@ export function createComponent<
     }, [props]);
   };
 
-  const Component: React.FC<ComponentProps> = _propsOnComponent => {
+  const Component = forwardRef<BaseEl, ComponentProps>((_propsOnComponent, ref) => {
     const [isHovered, setIsHovered] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
     const { activeBreakpoints, theme } = useContext(StyleKitNContext);
@@ -264,6 +264,7 @@ export function createComponent<
       children,
       style: allStyles,
       className: generatedClassNames,
+      ref,
       onBlur: () => {
         shouldListenToFocus && setIsFocused(false);
       },
@@ -279,7 +280,7 @@ export function createComponent<
     });
 
     return el;
-  };
+  });
 
   const styledComponent = (Component as unknown) as StyledComponent<
     BaseEl,

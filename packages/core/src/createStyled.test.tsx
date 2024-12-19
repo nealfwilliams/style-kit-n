@@ -99,6 +99,14 @@ describe('styled', () => {
     expect(rendered.style).toMatchObject({ color: 'red' });
   });
 
+  it('forwards ref to base element', () => {
+    const ref = React.createRef<HTMLDivElement>();
+    const Test = styled('div');
+
+    renderComponent(Test, { ref });
+    expect(ref.current).toBeDefined();
+  });
+
   it('adds component styles from props passed as parameter', () => {
     const Test = styled('div', {
       s: 'small',

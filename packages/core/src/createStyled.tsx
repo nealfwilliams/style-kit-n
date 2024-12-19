@@ -90,6 +90,7 @@ function _styled<
   let computeStylesFn:
     | ComputeStylesFn<CustomProps & ParentCustomProps, StyleProps, GeneratedStyles>
     | undefined;
+
   let inheritedComputeStylesFns: ComputeStylesFn<
     ParentCustomProps,
     StyleProps,

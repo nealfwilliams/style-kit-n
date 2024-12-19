@@ -103,7 +103,6 @@ export const htmlAttributes = new Set([
   'seamless',
   'selected',
   'shape',
-  'size',
   'sizes',
   'span',
   'spellCheck',

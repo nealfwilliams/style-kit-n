@@ -1,6 +1,6 @@
 {
   "name": "@style-kit-n/web",
-  "version": "0.25.0",
+  "version": "0.27.0",
   "files": [
     "dist",
     "src"
@@ -41,7 +41,7 @@
     }
   ],
   "dependencies": {
-    "@style-kit-n/core": "0.13.0"
+    "@style-kit-n/core": "0.14.0"
   },
   "peerDependencies": {
     "react": "^18.2.0",
