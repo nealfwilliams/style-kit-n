@@ -97,6 +97,7 @@ export interface StyleEngine<
   Theme = any
 > {
   generateStyles: GenerateStyles<StyleProps, GeneratedStyles, Theme>;
+  reprocessStyles?: (styles: GeneratedStyles) => GeneratedStyles;
   generateClasses: GenerateClassNames<StyleProps, ClassNames>;
   resolveClassConflicts: ResolveClassConflicts<ClassNames>;
   getMediaWidth: () => number;

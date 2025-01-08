@@ -197,7 +197,7 @@ export function createComponent<
       [propsOnComponent, theme]
     );
 
-    const allStyles = {
+    let allStyles = {
       // Priority 3 - Styles from inheritance
       ...propStylesFromInheritance,
       ...inheritedDirectStyles,
@@ -212,6 +212,10 @@ export function createComponent<
       ...propStylesFromComponentProps,
       ...styleAsProp,
     };
+
+    if (engine.reprocessStyles) {
+      allStyles = engine.reprocessStyles(allStyles);
+    }
 
     const shouldListenToFocus = React.useMemo(
       () =>
