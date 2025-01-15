@@ -38,5 +38,13 @@ export const webEngine: StyleEngine<
     }
   },
   cleanupResizeListener: () => {},
-  getBaseProps: () => htmlAttributes
+  getBaseProps: () => htmlAttributes,
+  reprocessStyles: (styles) => {
+    const {borderColor, border, ...rest} = styles
+    return {
+      ...rest,
+      border,
+      borderColor
+    }
+  }
 };
