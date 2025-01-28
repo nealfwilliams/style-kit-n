@@ -4,3 +4,4 @@ export { WebKitNProvider } from './WebKitNProvider';
 export { WebStyleProps, WebTheme } from './types';
 export { createStyled, styledWeb } from './createStyled';
 export * from './components'
+export { useSknTheme, useActiveBreakpoints } from '@style-kit-n/core';

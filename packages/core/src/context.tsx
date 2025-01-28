@@ -87,3 +87,11 @@ export const StyleKitNProvider: React.FC<{
     </StyleKitNContext.Provider>
   );
 };
+
+export const useSknTheme = () => {
+  return React.useContext(StyleKitNContext).theme;
+};
+
+export const useActiveBreakpoints = () => {
+  return React.useContext(StyleKitNContext).activeBreakpoints;
+}

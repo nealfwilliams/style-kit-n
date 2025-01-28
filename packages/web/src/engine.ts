@@ -41,10 +41,15 @@ export const webEngine: StyleEngine<
   getBaseProps: () => htmlAttributes,
   reprocessStyles: (styles) => {
     const {borderColor, border, ...rest} = styles
-    return {
-      ...rest,
-      border,
-      borderColor
+
+    if (border && borderColor) {
+      return {
+        ...rest,
+        border,
+        borderColor
+      }
     }
+
+    return styles
   }
 };
